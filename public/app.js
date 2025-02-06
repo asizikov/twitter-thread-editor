@@ -46,9 +46,25 @@ The future of software development is here, and it's collaborative. Humans and A
                         }
                     }
                     
-                    // Split paragraph into words
+                    // Handle continuous text without spaces
+                    if (!paragraph.includes(' ')) {
+                        let remainingText = paragraph;
+                        while (remainingText.length > 0) {
+                            // If we have existing content in currentChunk, push it first
+                            if (currentChunk) {
+                                finalChunks.push(currentChunk);
+                                currentChunk = '';
+                            }
+                            // Take the maximum possible characters
+                            const chunkSize = Math.min(remainingText.length, this.maxTweetLength);
+                            finalChunks.push(remainingText.substring(0, chunkSize));
+                            remainingText = remainingText.substring(chunkSize);
+                        }
+                        return;
+                    }
+
+                    // Regular word-based splitting for text with spaces
                     const words = paragraph.split(/\s+/);
-                    
                     words.forEach((word, index) => {
                         const space = currentChunk.length > 0 ? ' ' : '';
                         const wordWithSpace = space + word;
@@ -56,10 +72,24 @@ The future of software development is here, and it's collaborative. Humans and A
                         if (currentChunk.length + wordWithSpace.length <= this.maxTweetLength) {
                             currentChunk += wordWithSpace;
                         } else {
-                            if (currentChunk) {
-                                finalChunks.push(currentChunk);
+                            // If a single word is longer than tweet length, split it
+                            if (word.length > this.maxTweetLength) {
+                                if (currentChunk) {
+                                    finalChunks.push(currentChunk);
+                                    currentChunk = '';
+                                }
+                                let remainingWord = word;
+                                while (remainingWord.length > 0) {
+                                    const chunkSize = Math.min(remainingWord.length, this.maxTweetLength);
+                                    finalChunks.push(remainingWord.substring(0, chunkSize));
+                                    remainingWord = remainingWord.substring(chunkSize);
+                                }
+                            } else {
+                                if (currentChunk) {
+                                    finalChunks.push(currentChunk);
+                                }
+                                currentChunk = word;
                             }
-                            currentChunk = word;
                         }
                     });
                 });
