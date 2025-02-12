@@ -31,48 +31,68 @@ export const threadLogic = {
 
     _splitLongChunk(chunk, maxLength, finalChunks) {
         if (!chunk.includes(' ')) {
-            // Handle text without spaces
             let remainingText = chunk;
-            while (remainingText.length > 0) {
-                const chunkSize = Math.min(remainingText.length, maxLength);
-                finalChunks.push(remainingText.substring(0, chunkSize));
-                remainingText = remainingText.substring(chunkSize);
+            let isFirst = true;
+
+            // First chunk: 47 chars + '...'
+            const firstChunkContent = remainingText.substring(0, maxLength - 3);
+            finalChunks.push(firstChunkContent + '...');
+            remainingText = remainingText.substring(maxLength - 3);
+
+            // Middle chunks: '...' + 44 chars + '...'
+            while (remainingText.length > maxLength - 3) {
+                const middleChunkContent = remainingText.substring(0, maxLength - 6);
+                finalChunks.push('...' + middleChunkContent + '...');
+                remainingText = remainingText.substring(maxLength - 6);
+            }
+
+            // Last chunk: '...' + remaining chars (if any)
+            if (remainingText.length > 0) {
+                finalChunks.push('...' + remainingText);
             }
             return;
         }
 
-        let currentChunk = '';
-        const words = chunk.split(' '); // Split by space
-        
-        words.forEach((word, index) => {
-            const space = currentChunk.length > 0 ? ' ' : '';
-            const wordWithSpace = space + word;
+        let remainingText = chunk;
+        let isFirst = true;
+
+        while (remainingText.length > 0) {
+            const ellipsesLength = 3;
+            let availableSpace = maxLength;
             
-            if (currentChunk.length + wordWithSpace.length <= maxLength) {
-                currentChunk += wordWithSpace;
-            } else if (word.length > maxLength) {
-                // Handle a word that's longer than maxLength
-                if (currentChunk) {
-                    finalChunks.push(currentChunk.trim());
-                    currentChunk = '';
-                }
-                let remainingWord = word;
-                while (remainingWord.length > 0) {
-                    const chunkSize = Math.min(remainingWord.length, maxLength);
-                    finalChunks.push(remainingWord.substring(0, chunkSize));
-                    remainingWord = remainingWord.substring(chunkSize);
-                }
-            } else {
-                // Word doesn't fit in current chunk but isn't too long
-                if (currentChunk) {
-                    finalChunks.push(currentChunk.trim());
-                }
-                currentChunk = word;
+            if (!isFirst) {
+                availableSpace -= ellipsesLength; // Space for leading ellipsis
             }
-        });
-        
-        if (currentChunk) {
-            finalChunks.push(currentChunk.trim());
+            
+            if (remainingText.length > availableSpace - ellipsesLength) {
+                // Need to split, so reserve space for trailing ellipsis
+                availableSpace -= ellipsesLength;
+                
+                // Find the last space within the available space
+                let splitIndex = remainingText.lastIndexOf(' ', availableSpace);
+                if (splitIndex === -1) {
+                    splitIndex = availableSpace;
+                }
+
+                let currentPiece = remainingText.substring(0, splitIndex).trim();
+                currentPiece += '...';
+                if (!isFirst) {
+                    currentPiece = '...' + currentPiece;
+                }
+
+                finalChunks.push(currentPiece);
+                remainingText = remainingText.substring(splitIndex).trim();
+            } else {
+                // This is the last piece
+                let currentPiece = remainingText.trim();
+                if (!isFirst) {
+                    currentPiece = '...' + currentPiece;
+                }
+                finalChunks.push(currentPiece);
+                break;
+            }
+            
+            isFirst = false;
         }
     }
 }

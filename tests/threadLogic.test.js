@@ -61,7 +61,7 @@ describe('Thread Logic', () => {
             const result = threadLogic.splitIntoTweets(longWord);
             expect(result).toHaveLength(2);
             expect(result[0].length).toBe(280);
-            expect(result[1].length).toBe(20);
+            expect(result[1].length).toBe(20 + 3 + 3);
         });
 
         test('should respect word boundaries when possible', () => {
@@ -78,7 +78,32 @@ describe('Thread Logic', () => {
         test('should handle custom max length', () => {
             const text = 'This is a test message';
             const result = threadLogic.splitIntoTweets(text, 10);
-            expect(result).toEqual(['This is a', 'test', 'message']);
+            expect(result).toEqual(['This is...', '...a...', '...test...', '...mess...','...age']);
+        });
+
+        test('should add ellipses when splitting long text', () => {
+            const text = 'This is a very long text that needs to be split into multiple tweets because it exceeds the maximum tweet length.';
+            const result = threadLogic.splitIntoTweets(text, 50);
+            expect(result).toEqual([
+                'This is a very long text that needs to be split...',
+                '...into multiple tweets because it exceeds the...',
+                '...maximum tweet length.'
+            ]);
+        });
+
+        test('should add ellipses when splitting long words', () => {
+            const longWord = 'a'.repeat(300);
+            const result = threadLogic.splitIntoTweets(longWord, 50);
+            
+            expect(result).toEqual([
+                'a'.repeat(47) + '...',                    // First: 47 chars + 3 chars ellipsis = 50
+                '...' + 'a'.repeat(44) + '...',           // Middle: 3 + 44 + 3 = 50
+                '...' + 'a'.repeat(44) + '...',           // Middle: 3 + 44 + 3 = 50
+                '...' + 'a'.repeat(44) + '...',           // Middle: 3 + 44 + 3 = 50
+                '...' + 'a'.repeat(44) + '...',           // Middle: 3 + 44 + 3 = 50
+                '...' + 'a'.repeat(44) + '...',           // Middle: 3 + 44 + 3 = 50
+                '...' + 'a'.repeat(33)                    // Last: 3 + remaining 33 chars = 36
+            ]);
         });
     });
 });

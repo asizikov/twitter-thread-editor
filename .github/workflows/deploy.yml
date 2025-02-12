@@ -17,7 +17,25 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          
+      - name: Install dependencies
+        run: npm ci
+        
+      - name: Run tests
+        run: npm test
+
   deploy:
+    needs: test  # Ensure tests pass before deploying
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
