@@ -26,72 +26,48 @@ The future of software development is here, and it's collaborative. Humans and A
         tweetThreadChunks() {
             if (!this.inputText.trim()) return [];
             
-            // First split by double newlines
-            const forcedChunks = this.inputText.split(/\n\n+/);
+            // Split by triple or more newlines to force tweet breaks
+            const forcedChunks = this.inputText.split(/\n\n\n+/);
             const finalChunks = [];
             
             forcedChunks.forEach(chunk => {
-                // For each forced chunk, handle single newlines and respect character limit
-                const paragraphs = chunk.split(/\n/);
-                let currentChunk = '';
+                if (!chunk.trim()) return; // Skip empty chunks
                 
-                paragraphs.forEach((paragraph, pIndex) => {
-                    // Add line break if not the first paragraph and there's content
-                    if (pIndex > 0 && currentChunk) {
-                        if (currentChunk.length + 1 <= this.maxTweetLength) {
-                            currentChunk += '\n';
-                        } else {
-                            finalChunks.push(currentChunk);
-                            currentChunk = '';
-                        }
-                    }
-                    
-                    // Handle continuous text without spaces
-                    if (!paragraph.includes(' ')) {
-                        let remainingText = paragraph;
-                        while (remainingText.length > 0) {
-                            // If we have existing content in currentChunk, push it first
+                // Preserve the original whitespace within the chunk, but trim only leading/trailing spaces
+                chunk = chunk.replace(/^\s+|\s+$/g, '');
+                
+                if (chunk.length <= this.maxTweetLength) {
+                    finalChunks.push(chunk);
+                    return;
+                }
+                
+                let currentChunk = '';
+                const words = chunk.split(/(\s+)/); // Split preserving whitespace
+                
+                words.forEach((word) => {
+                    if (currentChunk.length + word.length <= this.maxTweetLength) {
+                        currentChunk += word;
+                    } else {
+                        if (word.trim().length > this.maxTweetLength) {
+                            // Handle very long words
                             if (currentChunk) {
                                 finalChunks.push(currentChunk);
                                 currentChunk = '';
                             }
-                            // Take the maximum possible characters
-                            const chunkSize = Math.min(remainingText.length, this.maxTweetLength);
-                            finalChunks.push(remainingText.substring(0, chunkSize));
-                            remainingText = remainingText.substring(chunkSize);
-                        }
-                        return;
-                    }
-
-                    // Regular word-based splitting for text with spaces
-                    const words = paragraph.split(/\s+/);
-                    words.forEach((word, index) => {
-                        const space = currentChunk.length > 0 ? ' ' : '';
-                        const wordWithSpace = space + word;
-                        
-                        if (currentChunk.length + wordWithSpace.length <= this.maxTweetLength) {
-                            currentChunk += wordWithSpace;
-                        } else {
-                            // If a single word is longer than tweet length, split it
-                            if (word.length > this.maxTweetLength) {
-                                if (currentChunk) {
-                                    finalChunks.push(currentChunk);
-                                    currentChunk = '';
-                                }
-                                let remainingWord = word;
-                                while (remainingWord.length > 0) {
-                                    const chunkSize = Math.min(remainingWord.length, this.maxTweetLength);
-                                    finalChunks.push(remainingWord.substring(0, chunkSize));
-                                    remainingWord = remainingWord.substring(chunkSize);
-                                }
-                            } else {
-                                if (currentChunk) {
-                                    finalChunks.push(currentChunk);
-                                }
-                                currentChunk = word;
+                            let remainingWord = word;
+                            while (remainingWord.length > 0) {
+                                const chunkSize = Math.min(remainingWord.length, this.maxTweetLength);
+                                finalChunks.push(remainingWord.substring(0, chunkSize));
+                                remainingWord = remainingWord.substring(chunkSize);
                             }
+                        } else {
+                            // Normal word that doesn't fit
+                            if (currentChunk) {
+                                finalChunks.push(currentChunk);
+                            }
+                            currentChunk = word;
                         }
-                    });
+                    }
                 });
                 
                 if (currentChunk) {

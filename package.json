@@ -4,13 +4,39 @@
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "jest"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
-  "description": "",
+  "description": "A simple, elegant web application that helps you compose and format Twitter threads. Write your content in a single text area and see it automatically split into tweet-sized chunks in real-time.",
   "dependencies": {
     "express": "^4.21.2"
-  }
+  },
+  "devDependencies": {
+    "@babel/core": "^7.26.7",
+    "@babel/preset-env": "^7.26.7",
+    "@vue/test-utils": "^2.4.6",
+    "babel-jest": "^29.7.0",
+    "jest": "^29.7.0",
+    "jest-environment-jsdom": "^29.7.0"
+  },
+  "directories": {
+    "test": "tests"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/asizikov/twitter-thread-editor.git"
+  },
+  "bugs": {
+    "url": "https://github.com/asizikov/twitter-thread-editor/issues"
+  },
+  "homepage": "https://github.com/asizikov/twitter-thread-editor#readme",
+  "jest": {
+    "transform": {
+      "^.+\\.js$": "babel-jest"
+    },
+    "testEnvironment": "node"
+  },
+  "type": "module"
 }
