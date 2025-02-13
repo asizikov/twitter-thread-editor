@@ -90,8 +90,23 @@
         .right-panel {
             flex: 1;
             padding: 20px;
-            overflow-y: auto;
             position: relative;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .right-panel .panel-header {
+            position: sticky;
+            top: 0;
+            background: rgba(30, 30, 30, 0.95);
+            padding: 0 0 20px 0;
+            margin: 0;
+            z-index: 2;
+        }
+
+        .right-panel .tweets-container {
+            overflow-y: auto;
+            flex: 1;
         }
 
         .input-area {
@@ -208,6 +223,35 @@
             width: 100%;
             pointer-events: auto;
         }
+
+        /* Custom Scrollbar Styles */
+        ::-webkit-scrollbar {
+            width: 10px;
+            height: 10px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: rgba(30, 30, 30, 0.2);
+            border-radius: 5px;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: rgba(29, 161, 242, 0.4);
+            border-radius: 5px;
+            box-shadow: 0 0 10px rgba(29, 161, 242, 0.3);
+            transition: all 0.3s ease;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(29, 161, 242, 0.6);
+            box-shadow: 0 0 15px rgba(29, 161, 242, 0.4);
+        }
+
+        /* Firefox scrollbar styles */
+        * {
+            scrollbar-width: thin;
+            scrollbar-color: rgba(29, 161, 242, 0.4) rgba(30, 30, 30, 0.2);
+        }
     </style>
 </head>
 <body>
@@ -231,23 +275,25 @@
             </div>
             <div class="right-panel">
                 <h2 class="panel-header">✨ Your Thread ✨</h2>
-                <transition-group name="tweet-list">
-                    <div 
-                        v-for="(tweet, index) in tweetThreadChunks" 
-                        :key="index"
-                        class="tweet-preview"
-                        :class="{ 'copied': isTweetCopied(index) }"
-                    >
-                        <div class="tweet-header">
-                            <span>{{ tweet.length }} / {{ maxTweetLength }} characters</span>
-                            <button class="copy-button" @click="copyToClipboard(tweet, index)" title="Copy to clipboard">
-                                <i class="fas" :class="isTweetCopied(index) ? 'fa-check' : 'fa-copy'"></i>
-                                <span class="copied-text" v-if="isTweetCopied(index)">Copied!</span>
-                            </button>
+                <div class="tweets-container">
+                    <transition-group name="tweet-list">
+                        <div 
+                            v-for="(tweet, index) in tweetThreadChunks" 
+                            :key="index"
+                            class="tweet-preview"
+                            :class="{ 'copied': isTweetCopied(index) }"
+                        >
+                            <div class="tweet-header">
+                                <span>{{ tweet.length }} / {{ maxTweetLength }} characters</span>
+                                <button class="copy-button" @click="copyToClipboard(tweet, index)" title="Copy to clipboard">
+                                    <i class="fas" :class="isTweetCopied(index) ? 'fa-check' : 'fa-copy'"></i>
+                                    <span class="copied-text" v-if="isTweetCopied(index)">Copied!</span>
+                                </button>
+                            </div>
+                            {{ tweet }}
                         </div>
-                        {{ tweet }}
-                    </div>
-                </transition-group>
+                    </transition-group>
+                </div>
             </div>
         </div>
         <footer class="footer">©️ cloud-eng.nl, {{ currentYear }}</footer>
