@@ -60,6 +60,12 @@
             margin-bottom: 15px;
             white-space: pre-wrap;
             position: relative;
+            transition: all 0.3s ease;
+        }
+        .tweet-preview.copied {
+            opacity: 0.7;
+            border-color: #1da1f2;
+            border-width: 2px;
         }
         .tweet-header {
             display: flex;
@@ -78,6 +84,10 @@
         }
         .copy-button:hover {
             color: #0d8bd9;
+        }
+        .copy-button .copied-text {
+            font-size: 12px;
+            margin-left: 5px;
         }
         
         /* Animation styles */
@@ -136,11 +146,13 @@
                     v-for="(tweet, index) in tweetThreadChunks" 
                     :key="index"
                     class="tweet-preview"
+                    :class="{ 'copied': isTweetCopied(index) }"
                 >
                     <div class="tweet-header">
                         <span>{{ tweet.length }} / {{ maxTweetLength }} characters</span>
-                        <button class="copy-button" @click="copyToClipboard(tweet)" title="Copy to clipboard">
-                            <i class="fas fa-copy"></i>
+                        <button class="copy-button" @click="copyToClipboard(tweet, index)" title="Copy to clipboard">
+                            <i class="fas" :class="isTweetCopied(index) ? 'fa-check' : 'fa-copy'"></i>
+                            <span class="copied-text" v-if="isTweetCopied(index)">Copied!</span>
                         </button>
                     </div>
                     {{ tweet }}
