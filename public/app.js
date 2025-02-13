@@ -26,6 +26,9 @@ The future of software development is here, and it's collaborative. Humans and A
           }
       },
       computed: {
+          currentYear() {
+              return new Date().getFullYear();
+          },
           characterCount() {
               return threadLogic.getCharacterCount(this.inputText);
           },
